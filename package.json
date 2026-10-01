@@ -1,6 +1,6 @@
 {
   "name": "paseo-slack",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A mini Slack inside Paseo: full Web API access, personal identity, zero-cost real-time event router, and MCP tools for AI fleets.",
   "type": "module",
   "main": "src/index.js",

@@ -74,6 +74,50 @@ export class EventDispatcher {
       .join('\n');
   }
 
+  buildFleetEnvelope(event) {
+    const isDm = this.isDirectMessage(event.channel);
+    const isMention = this.isMentioned(event.text);
+    const eventType = isDm ? 'dm' : isMention ? 'mention' : 'thread_reply';
+    const teamId = event.team || this.config.teamId || 'default';
+    const channelId = event.channel || 'unknown';
+    const ts = event.ts || Date.now().toString();
+    const threadTs = event.thread_ts || event.ts || null;
+    const actorId = event.user || 'unknown';
+    const actorName = event.username || event.user || 'Anonymous';
+    const isBot = Boolean(event.bot_id || event.subtype === 'bot_message');
+
+    return {
+      protocol: 'paseo-fleet/v1',
+      id: `evt_slack_${teamId}_${channelId}_${ts.replace('.', '_')}`,
+      timestamp: new Date().toISOString(),
+      source: 'slack',
+      instance: teamId,
+      scope: channelId,
+      urn: `urn:slack:${teamId}:${channelId}:${ts}`,
+      event_type: eventType,
+      actor: {
+        id: actorId,
+        name: actorName,
+        is_bot: isBot,
+      },
+      target: {
+        type: threadTs ? 'thread' : 'channel',
+        id: threadTs || channelId,
+        channel: channelId,
+        team: teamId,
+      },
+      content: event.text || '',
+      reply_action: {
+        type: 'mcp',
+        tool: 'slack_send_message',
+        params: {
+          channel: channelId,
+          ...(threadTs ? { thread_ts: threadTs } : {}),
+        },
+      },
+    };
+  }
+
   async sendToPaseo(agentId, prompt) {
     const paseoBin = this.config.paseoBin;
     try {
@@ -107,10 +151,10 @@ export class EventDispatcher {
       return { routed: false, reason: 'Filtered out as background noise' };
     }
 
-    const prompt = this.buildMessagePrompt(event);
     const specificAgent = this.registry.findMatchingAgent(event);
 
     if (specificAgent) {
+      const prompt = this.buildMessagePrompt(event);
       const result = await this.sendToPaseo(specificAgent, prompt);
       return {
         routed: true,
@@ -122,19 +166,23 @@ export class EventDispatcher {
 
     const coordinatorId = this.registry.getCoordinator() || this.config.coordinatorAgentId;
     if (coordinatorId) {
-      const result = await this.sendToPaseo(coordinatorId, prompt);
+      const envelope = this.buildFleetEnvelope(event);
+      const envelopeJson = JSON.stringify(envelope, null, 2);
+      const result = await this.sendToPaseo(coordinatorId, envelopeJson);
       return {
         routed: true,
         type: 'coordinator',
         targetAgent: coordinatorId,
         delivery: result,
+        envelope,
       };
     }
 
+    const fallbackPrompt = this.buildMessagePrompt(event);
     return {
       routed: false,
       reason: 'No matching subscription and no coordinator configured',
-      eventPrompt: prompt,
+      eventPrompt: fallbackPrompt,
     };
   }
 }
