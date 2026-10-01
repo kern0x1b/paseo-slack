@@ -1,0 +1,50 @@
+name: Bug Report
+description: Report an issue in paseo-slack
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not report security vulnerabilities here — see [SECURITY.md](../blob/main/SECURITY.md).
+        Never paste real tokens, cookies, or confidential conversations.
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js Version
+      placeholder: 'v20.12.0 / v22.0.0'
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      placeholder: 'macOS 15.4 / Ubuntu 24.04 / Linux'
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this?
+      value: |
+        1. Run `slack ...`
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs
+      description: Redact any sensitive tokens before pasting logs.
+      render: text
