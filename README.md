@@ -130,17 +130,20 @@ slack react C12345678 1727200000.123 eyes
 ### AI Fleet Coordination & Routing
 
 ```bash
-# 1. Set default coordinator agent
+# 1. Coordinator agent binding
 slack set-coordinator afe3e85b-e376-4b7f-a10b-5970ced5b432
+slack unset-coordinator
 
 # 2. Worker agent subscribes to replies in a specific review thread
 slack subscribe --agent 2a4279a --thread 1727200000.123
 
-# 3. View active fleet subscriptions
+# 3. View active fleet subscriptions and bound coordinator
 slack subscriptions
 
-# 4. Start real-time router daemon
-slack daemon
+# 4. Daemon lifecycle
+slack daemon          # Start real-time router daemon (Socket Mode with Smart Polling fallback)
+slack daemon status   # Check daemon running status and live PID
+slack daemon stop     # Cleanly stop running daemon (SIGTERM)
 ```
 
 ### Raw API Access
