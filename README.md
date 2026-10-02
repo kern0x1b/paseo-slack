@@ -140,6 +140,9 @@ slack subscribe --agent 2a4279a --thread 1727200000.123
 # 3. View active fleet subscriptions and bound coordinator
 slack subscriptions
 
+# DMs and mentions you have not replied to, as paseo-fleet/v1 JSON (for `fleet sweep`)
+slack snapshot --since 2026-10-01T00:00:00Z
+
 # 4. Daemon lifecycle
 slack daemon          # Start real-time router daemon (Socket Mode with Smart Polling fallback)
 slack daemon status   # Check daemon running status and live PID

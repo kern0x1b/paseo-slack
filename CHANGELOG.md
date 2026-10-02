@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `slack snapshot --since <iso>`: direct messages and mentions you have not replied to, grouped per conversation or thread, as one `paseo-fleet/v1` document for `fleet sweep`.
+
 ## [1.1.0] - 2026-10-02
 
 ### Added

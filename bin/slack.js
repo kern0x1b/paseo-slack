@@ -5,6 +5,7 @@ import { SubscriptionRegistry } from '../src/subscriptions.js';
 import { EventDispatcher } from '../src/dispatcher.js';
 import { SocketListener } from '../src/socket-listener.js';
 import { McpServer } from '../src/mcp.js';
+import { SlackSnapshot } from '../src/snapshot.js';
 import { loadConfig, saveConfig, getConfigPath } from '../src/config.js';
 import { isDaemonRunning, isPidAlive, clearState } from '../src/daemon-state.js';
 
@@ -56,6 +57,9 @@ COMMANDS:
                                    Options: --count <n> (default: 20)
 
   react <channel> <ts> <emoji>     Add an emoji reaction (without colons, e.g. thumbsup)
+
+  snapshot                         Print DMs and mentions you have not replied to as paseo-fleet/v1 JSON
+                                   Options: --since <iso-timestamp> (default: 24 hours ago)
 
   whoami                           Test authentication and print current user / team
 
@@ -210,6 +214,17 @@ async function main() {
 
         await client.addReaction({ channel, timestamp, name: emoji.replace(/:/g, '') });
         console.log(`Reaction :${emoji}: added to message ${timestamp}`);
+        break;
+      }
+
+      case 'snapshot': {
+        const since = flags.since ? new Date(flags.since) : new Date(Date.now() - 24 * 60 * 60 * 1000);
+        if (Number.isNaN(since.getTime())) {
+          console.error('Error: --since must be an ISO-8601 timestamp.');
+          process.exit(1);
+        }
+        const snapshot = await new SlackSnapshot({ client }).collect({ since });
+        console.log(JSON.stringify(snapshot, null, 2));
         break;
       }
 
